@@ -23,11 +23,11 @@ In **hard clustering**, each observation is assigned to exactly one cluster
 several clusters at once with fractional grades.
 
 Wikipedia’s apple example: hard clustering says an apple is red **or** green;
-fuzzy clustering allows red **and** green to a degree — e.g. red \(=0.5\),
-green \(=0.5\).  Grades are normalized to \([0,1]\).  They are **not**
+fuzzy clustering allows red **and** green to a degree — e.g. red $=0.5$,
+green $=0.5$.  Grades are normalized to $[0,1]$.  They are **not**
 always probabilities (some fuzzy schemes need not sum to 1); this package’s
 flagship **Fuzzy *c*-means** uses the common **row-stochastic** convention
-\(\sum_j w_{ij}=1\).
+$\sum_j w_{ij}=1$.
 
 ### Membership grades
 
@@ -39,15 +39,15 @@ Utilities in this package:
 
 | Helper | Role |
 | --- | --- |
-| `Is_Row_Stochastic` | Validate \(w_{ij}\in[0,1]\), rows sum to 1 |
-| `Harden` / `Hard_Labels_From_Memberships` | Soft → hard via \(\arg\max_j w_{ij}\) |
+| `Is_Row_Stochastic` | Validate $w_{ij}\in[0,1]$, rows sum to 1 |
+| `Harden` / `Hard_Labels_From_Memberships` | Soft → hard via $\arg\max_j w_{ij}$ |
 | `Soften_From_Hard` | Hard → soft one-hot memberships |
-| `Max_Membership` | Peak membership \(\max_j w_{ij}\) for a row |
-| `Partition_Coefficient` | \(\mathrm{PC}=(1/n)\sum_i\sum_j w_{ij}^2\in[1/c,1]\) |
-| `Partition_Entropy` | \(\mathrm{PE}=-(1/n)\sum_i\sum_j w_{ij}\log w_{ij}\) |
-| `Max_Membership_Delta` | \(\max\|W-W'\|_\infty\) (convergence) |
+| `Max_Membership` | Peak membership $\max_j w_{ij}$ for a row |
+| `Partition_Coefficient` | $\mathrm{PC}=(1/n)\sum_i\sum_j w_{ij}^2\in[1/c,1]$ |
+| `Partition_Entropy` | $\mathrm{PE}=-(1/n)\sum_i\sum_j w_{ij}\log w_{ij}$ |
+| `Max_Membership_Delta` | $\max\|W-W'\|_\infty$ (convergence) |
 
-Hard partitions have \(\mathrm{PC}=1\) and \(\mathrm{PE}=0\); fuzzier
+Hard partitions have $\mathrm{PC}=1$ and $\mathrm{PE}=0$; fuzzier
 partitions lower PC and raise PE.
 
 ## Flagship algorithm: Fuzzy *c*-means (Dunn / Bezdek)
@@ -56,66 +56,66 @@ partitions lower PC and raise PE.
 by **J.C. Bezdek** (1981).  It is the primary algorithm covered by the
 Wikipedia article and the centerpiece of this survey package.
 
-Given observations \(\mathbf{x}_1,\ldots,\mathbf{x}_n\in\mathbb{R}^d\) and
-\(c\) clusters, FCM minimizes
+Given observations $\mathbf{x}_1,\ldots,\mathbf{x}_n\in\mathbb{R}^d$ and
+$c$ clusters, FCM minimizes
 
-\[
+$$
 J(W,C)=\sum_{i=1}^{n}\sum_{j=1}^{c} w_{ij}^{m}\,\|\mathbf{x}_i-\mathbf{c}_j\|^2
-\]
+$$
 
-with row-stochastic memberships \(\sum_j w_{ij}=1\), \(w_{ij}\ge 0\).
+with row-stochastic memberships $\sum_j w_{ij}=1$, $w_{ij}\ge 0$.
 
 **Centroid update** (weighted mean):
 
-\[
+$$
 \mathbf{c}_j=\frac{\sum_i w_{ij}^{m}\,\mathbf{x}_i}{\sum_i w_{ij}^{m}}
-\]
+$$
 
 **Membership update** (Bezdek):
 
-\[
+$$
 w_{ij}=\Biggl(\sum_{k=1}^{c}
 \Biggl(\frac{\|\mathbf{x}_i-\mathbf{c}_j\|}{\|\mathbf{x}_i-\mathbf{c}_k\|}
 \Biggr)^{\frac{2}{m-1}}\Biggr)^{-1}
-\]
+$$
 
-**Zero-distance guard:** if \(\mathbf{x}_i=\mathbf{c}_j\), set \(w_{ij}=1\)
+**Zero-distance guard:** if $\mathbf{x}_i=\mathbf{c}_j$, set $w_{ij}=1$
 and all other memberships for that point to 0 (numerically: squared distance
-\(\le\) `Distance_Eps`).
+$\le$ `Distance_Eps`).
 
-### Fuzzifier \(m\)
+### Fuzzifier $m$
 
-The hyper-parameter \(m\in(1,\infty)\) controls fuzziness.  Larger \(m\)
-yields fuzzier (more shared) partitions.  As \(m\to 1^+\), memberships become
+The hyper-parameter $m\in(1,\infty)$ controls fuzziness.  Larger $m$
+yields fuzzier (more shared) partitions.  As $m\to 1^+$, memberships become
 increasingly crisp and FCM approaches hard *k*-means.  Common default:
-\(m=2\).
+$m=2$.
 
 ### Soft *k*-means
 
 Wikipedia equates fuzzy clustering with **soft *k*-means**.  In this package,
-`Run_Soft_KMeans` is FCM with the fuzzifier forced to \(m=2\) (other
+`Run_Soft_KMeans` is FCM with the fuzzifier forced to $m=2$ (other
 `Parameters` fields are honored).
 
 ### Iteration
 
-1. Choose \(c\); initialize memberships randomly (seeded LCG) with row sums 1.
-2. Update centers from \(W\).
-3. Update \(W\) from centers.
-4. Repeat until \(\max|\Delta w|<\varepsilon\) or `Max_Iters`.
+1. Choose $c$; initialize memberships randomly (seeded LCG) with row sums 1.
+2. Update centers from $W$.
+3. Update $W$ from centers.
+4. Repeat until $\max|\Delta w|<\varepsilon$ or `Max_Iters`.
 
-Metric: Euclidean \(L_2\) / squared \(L_2\).
+Metric: Euclidean $L_2$ / squared $L_2$.
 
 ## Project overview
 
 | Concern | Approach | Notes |
 | --- | --- | --- |
 | **Survey** | Soft vs hard + membership utilities | Harden / Soften / PC / PE |
-| **Metric** | Euclidean \(L_2\) / squared \(L_2\) | `Distance`, `Squared_Distance` |
+| **Metric** | Euclidean $L_2$ / squared $L_2$ | `Distance`, `Squared_Distance` |
 | **Init** | Seeded LCG random memberships | `Init_Memberships_Random` |
 | **Updates** | Bezdek center + membership | `Update_Centers`, `Update_Memberships` |
-| **Stop** | \(\max\|\Delta W\|<\varepsilon\) | or `Max_Iters` |
-| **Objective** | \(J=\sum_i\sum_j w_{ij}^m\|x_i-c_j\|^2\) | `Objective_J` |
-| **Soft *k*-means** | FCM with \(m=2\) | `Run_Soft_KMeans` |
+| **Stop** | $\max\|\Delta W\|<\varepsilon$ | or `Max_Iters` |
+| **Objective** | $J=\sum_i\sum_j w_{ij}^m\|x_i-c_j\|^2$ | `Objective_J` |
+| **Soft *k*-means** | FCM with $m=2$ | `Run_Soft_KMeans` |
 | **Caps** | `Max_Points`, `Max_Dims`, `Max_Clusters` | Educational bounds |
 
 Strong typing uses domain types (`Real` digits 12, …).  Public subprograms
