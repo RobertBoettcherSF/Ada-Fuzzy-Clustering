@@ -4,7 +4,7 @@ Educational, self-contained Ada 2023 **survey** package for
 [Wikipedia: Fuzzy clustering](https://en.wikipedia.org/wiki/Fuzzy_clustering):
 **fuzzy / soft clustering** (also called **soft *k*-means**), in which each
 data point can belong to more than one cluster via graded **memberships**
-\(w_{ij}\in[0,1]\).
+$w_{ij} \in [0, 1]$.
 
 Language: **Ada 2023** (ISO/IEC 8652:2023), compiled with GNAT (`-gnat2022`).
 
